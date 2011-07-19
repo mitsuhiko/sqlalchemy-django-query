@@ -7,6 +7,14 @@
     query objects.  It's still API compatible with the regular one but
     extends it with Djangoisms.
 
+    Example queries::
+
+        Post.query.filter_by(pub_date__year=2008)
+        Post.query.exclude_by(id=42)
+        User.query.filter_by(name__istartswith='e')
+        Post.query.filter_by(blog__name__exact='something')
+        Post.query.order_by('-blog__name')
+
     :copyright: 2011 by Armin Ronacher, Mike Bayer.
     license: BSD, see LICENSE for more details.
 """
