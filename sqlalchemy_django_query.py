@@ -62,11 +62,21 @@ class DjangoQueryMixin(object):
     def exclude_by(self, **kwargs):
         return self._filter_or_exclude(True, kwargs)
 
-    def select_related(self, *columns):
-        if not columns:
-            return self.options(joinedload_all())
-        columns = [x.replace('__', '.') for x in columns]
-        return self.options(joinedload(columns))
+    def select_related(self, *columns, **options):
+        depth = options.pop('depth', None)
+        if options:
+            raise TypeError('Unexpected argument %r' % iter(options).next())
+        if depth not in (None, 1):
+            raise TypeError('Depth can only be 1 or None currently')
+        need_all = depth is None
+        columns = list(columns)
+        for idx, column in enumerate(columns):
+            column = column.replace('__', '.')
+            if '.' in column:
+                need_all = True
+            columns[idx] = column
+        func = (need_all and joinedload_all or joinedload)
+        return self.options(func(*columns))
 
     def order_by(self, *args):
         args = list(args)
