@@ -24,9 +24,9 @@ from sqlalchemy.util import to_list
 from sqlalchemy.sql import operators, extract
 
 
-class DjangoQuery(Query):
-    """A subclass of a regular SQLAlchemy query object that implements
-    more Django like behavior:
+class DjangoQueryMixin(object):
+    """Can be mixed into any Query class of SQLAlchemy and extends it to
+    implements more Django like behavior:
 
     -   `filter_by` supports implicit joining and subitem accessing with
         double underscores.
@@ -87,7 +87,7 @@ class DjangoQuery(Query):
                 column = column.desc()
             args[idx] = column
 
-        q = Query.order_by(self, *args)
+        q = super(DjangoQueryMixin, self).order_by(*args)
         for join in joins_needed:
             q = q.join(join)
         return q
@@ -115,3 +115,7 @@ class DjangoQuery(Query):
                 column = None
             q = q.reset_joinpoint()
         return q
+
+
+class DjangoQuery(DjangoQueryMixin, Query):
+    pass
