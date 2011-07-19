@@ -18,6 +18,7 @@
     :copyright: 2011 by Armin Ronacher, Mike Bayer.
     license: BSD, see LICENSE for more details.
 """
+from sqlalchemy.orm import joinedload, joinedload_all
 from sqlalchemy.orm.query import Query
 from sqlalchemy.orm.util import _entity_descriptor
 from sqlalchemy.util import to_list
@@ -60,6 +61,12 @@ class DjangoQueryMixin(object):
 
     def exclude_by(self, **kwargs):
         return self._filter_or_exclude(True, kwargs)
+
+    def select_related(self, *columns):
+        if not columns:
+            return self.options(joinedload_all())
+        columns = [x.replace('__', '.') for x in columns]
+        return self.options(joinedload(columns))
 
     def order_by(self, *args):
         args = list(args)
